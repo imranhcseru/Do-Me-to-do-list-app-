@@ -11,9 +11,10 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
   <link rel="shortcut icon" href="{{{ asset('img/favicon.png') }}}">
   <link rel="stylesheet" type="text/css" href="{{URL::asset('css/style.css')}}">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
-<body >
-    <div class = "myDiv" >
+<body>
+    <div class = "myDiv" id = "full_div">
         <div class="container" align = "center">
             <h2 class = "display-2">Do-Me</h2>
             <!-- Button to Open the Modal -->
@@ -54,7 +55,7 @@
             </div>
             <br>
             <br>
-            <table class="table table-striped table-light" align = "center">
+            <table class="table table-striped table-light" align = "center" id = "task_table">
                 <thead >
                     <tr align = "center">
                     <th scope="col">Mark As Done</th>
@@ -114,35 +115,39 @@
     </div>
 
     <script>
-        $.ajaxSetup({
-            headers:{
-                'X-CSRF-TOKEN': $('meta[name = "csrf-token"]').attr('content')
-            }
-        });
-
-        $("#form-insert").on('submit',function(e){
-            e.preventDefault();
-            var data = $(this).serialize();
-            var task = $('#task').val();
-            var url = $(this).attr('action');
-            var method = $(this).attr('method');
-
-            $.ajax({
-                type : method,
-                url : url,
-                data : data,
-                success:function(response){
-                    $(function () {
-                        $('#myModal').modal('toggle');
-                        
-                    });
-                    if(response>0){
-                        alert(response)
-                    }
-                    else{
-                        alert("no res")
-                    }
+        $(document).ready(function(){
+            $.ajaxSetup({
+                headers:{
+                    'X-CSRF-TOKEN': $('meta[name = "csrf-token"]').attr('content')
                 }
+            });
+
+            $("#form-insert").on('submit',function(e){
+                e.preventDefault();
+                var data = $(this).serialize();
+                var task = $('#task').val();
+                var url = $(this).attr('action');
+                var method = $(this).attr('method');
+                function loadTable(){
+                    $('#task_table').load(location.href + " #task_table");
+                }
+                $.ajax({
+                    type : method,
+                    url : url,
+                    data : data,
+                    success:function(response){
+                        $(function () {
+                            $('#myModal').modal('toggle');
+                            swal({
+                                  title: "Task Added",
+                                  text: "New Task Added Successfully",
+                                  icon: "success",
+                                  timer:2000
+                                });
+                            loadTable();
+                        });  
+                    }
+                });
             });
         });
     </script>

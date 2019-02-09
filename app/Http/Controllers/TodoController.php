@@ -19,6 +19,7 @@ class TodoController extends Controller
 
     public function home(){
         $tasks = Task::get();
+        
         return view('home')->with('tasks',$tasks);
     }
 
