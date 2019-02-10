@@ -43,7 +43,7 @@
                                 <div class="form-group">
                                     <label for="exampleInputEmail1">Task</label>
                                     <input type="text" class="form-control" name = "task" id = "input_task">
-                                    
+                                    <input id = "id" type = "hidden" name = "id">
                                 </div>
                                 <input id="signup-token" name="_token" type="hidden" value="{{csrf_token()}}">
                                 <button type="submit" class="btn btn-primary" id = "submit_task">Add</button>
@@ -66,7 +66,7 @@
                 <thead >
                     <tr align = "center">
                         <th>#</th>
-                        <th scope="col">Mark As Done</th>
+                        
                         <th scope="col">Task</th>
                         <th scope="col">Created-Date</th>
                         
@@ -79,12 +79,8 @@
                     @foreach($tasks as $task)
                     <tr>
                         <td>{{$count}}</td>
-                        <td scope="row">
-                            <a class = "btn btn-primary">Done</a>
-                        </td>
-                        
                         <td >
-                            <a class = "btn btn-secondary item" data-toggle="modal" data-target="#myModal" id = "edit_modal"><input type="hidden" class="form-control" name = "task" id = "task_id" value = {{$task->id}}>{{$task->task}}</a>
+                            <a class = "btn btn-secondary item" data-toggle="modal" data-target="#myModal" id = "edit_modal"><input type="hidden" id = "task_id" value = {{$task->id}}>{{$task->task}}</a>
                         </td>
                         <td>{{$task->created_at}}</td>  
                     </tr>
@@ -99,6 +95,30 @@
 
     <script>
         $(document).ready(function(){
+            $.ajaxSetup({
+                headers:{
+                    'X-CSRF-TOKEN': $('meta[name = "csrf-token"]').attr('content')
+                }
+            });
+
+            $("#form-insert").on('submit',function(e){
+                e.preventDefault();
+                var message = "New Task Added Successfully";
+                var data = $(this).serialize();
+                var url = $(this).attr('action');
+                var method = $(this).attr('method');
+                send_data(message,data,url,method);
+            });
+
+            $('#delete').click(function(){
+                var id = $('#id').val();
+                var message = "Task Deleted Successfully";
+                var url = 'delete';
+                var data = $(this).serialize();
+                var method = $(this).attr('method');
+                send_data(message,data,url,method); 
+            });
+            
             $('#add_modal').click(function(){
                 $('#change_task').hide();
                 $('#delete').hide();
@@ -113,15 +133,10 @@
                 $('#submit_task').hide();
                 var task_txt = $(this).text();
                 var id = $(this).find('#task_id').val();
+                $('#id').val(id);
                 $('#input_task').val(task_txt);
             });
- 
-            $.ajaxSetup({
-                headers:{
-                    'X-CSRF-TOKEN': $('meta[name = "csrf-token"]').attr('content')
-                }
-            });
-
+            
             function loadTable(){
                     $('#task_table').load(location.href + " #task_table");
             }
@@ -135,28 +150,22 @@
                     });
             }
 
-            function post_data(message,data,url,method,id){
+            function send_data(message,data,url,method){
                 $.ajax({
-                    type : method,
+                    type : 'post',
                     url : url,
                     data : data,
                     success:function(response){
-                        $(function () {
-                            $('#myModal').modal('toggle');
-                            sweet_alert(message);
-                            loadTable();
-                        });  
+                        // $(function () {
+                        //     $('#myModal').modal('toggle');
+                        //     sweet_alert(message);
+                        //     loadTable();
+                        // }); 
+                        console.log(url);
+                         
                     }
                 });  
-            }
-            $("#form-insert").on('submit',function(e){
-                e.preventDefault();
-                var message = "New Task Added Successfully";
-                var data = $(this).serialize();
-                var url = $(this).attr('action');
-                var method = $(this).attr('method');
-                post_data(message,data,url,method);
-            });
+            } 
         });
     </script>
 </body>
