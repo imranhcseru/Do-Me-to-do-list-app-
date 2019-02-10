@@ -156,13 +156,12 @@
                     url : url,
                     data : data,
                     success:function(response){
-                        // $(function () {
-                        //     $('#myModal').modal('toggle');
-                        //     sweet_alert(message);
-                        //     loadTable();
-                        // }); 
-                        console.log(url);
-                         
+                        $(function () {
+                            $('#myModal').modal('toggle');
+                            sweet_alert(message);
+                            loadTable();
+                        }); 
+                        console.log(url);   
                     }
                 });  
             } 
