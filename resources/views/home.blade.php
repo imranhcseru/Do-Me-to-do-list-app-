@@ -19,7 +19,7 @@
             <h2 class = "display-2">Do-Me</h2>
             <!-- Button to Open the Modal -->
             <div class = "container" align = "right">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" id = "add_modal">
                 Add New Task
                 </button>
             </div>
@@ -30,19 +30,25 @@
                 
                         <!-- Modal Header -->
                         <div class="modal-header" >
-                            <h4 class="modal-title">Add Task</h4>
+                            <h4 class="modal-title" id = "modal_title">Add Task</h4>
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         
                         <!-- Modal body -->
                         <div class="modal-body" >
                             <form align = "left" id = "form-insert" method = "post" action = "{{url('/store')}}">
+                            <div class="text-right">
+                            <button type="submit" class="btn btn-warning" id = "done">Completed</button>
+                            </div>
                                 <div class="form-group">
                                     <label for="exampleInputEmail1">Task</label>
-                                    <input type="text" class="form-control" name = "task" aria-describedby="emailHelp">
+                                    <input type="text" class="form-control" name = "task" id = "input_task">
+                                    
                                 </div>
                                 <input id="signup-token" name="_token" type="hidden" value="{{csrf_token()}}">
-                                <button type="submit" class="btn btn-primary">Add</button>
+                                <button type="submit" class="btn btn-primary" id = "submit_task">Add</button>
+                                <button type="submit" class="btn btn-primary" id = "change_task">Save Changes</button>
+                                <button type="submit" class="btn btn-danger" id = "delete">Delete</button>
                             </form>
                         </div>
                         
@@ -55,82 +61,81 @@
             </div>
             <br>
             <br>
+            
             <table class="table table-striped table-light" align = "center" id = "task_table">
                 <thead >
                     <tr align = "center">
-                    <th scope="col">Mark As Done</th>
-                    <th scope="col">Task</th>
-                    <th scope="col">Created-Date</th>
-                    <th scope="col">Action</th>
+                        <th>#</th>
+                        <th scope="col">Mark As Done</th>
+                        <th scope="col">Task</th>
+                        <th scope="col">Created-Date</th>
+                        
                     </tr>
                 </thead>
                 <tbody align = "center">
+                        @php
+                            $count = 0;
+                        @endphp
                     @foreach($tasks as $task)
                     <tr>
-                        <th scope="row">
+                        <td>{{$count}}</td>
+                        <td scope="row">
                             <a class = "btn btn-primary">Done</a>
-                        </th>
-                        <td>{{$task->task}}</td>
-                        <td>{{$task->created_at}}</td>
-                        <td>
-                        <a class = "btn btn-success">Edit</a><span>  </span><a class = "btn btn-danger">Delete</a>
                         </td>
+                        
+                        <td >
+                            <a class = "btn btn-secondary item" data-toggle="modal" data-target="#myModal" id = "edit_modal"><input type="hidden" class="form-control" name = "task" id = "task_id" value = {{$task->id}}>{{$task->task}}</a>
+                        </td>
+                        <td>{{$task->created_at}}</td>  
                     </tr>
+                        @php
+                            $count = $count + 1;
+                        @endphp
                     @endforeach
                 </tbody>
-                </table>
-            <!-- The Modal -->
-            <div class="modal fade" id="myModal">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                    
-                        <!-- Modal Header -->
-                        <div class="modal-header">
-                            <h4 class="modal-title">Add New Task</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>
-                        
-                        <!-- Modal body -->
-                        <div class="modal-body" >
-                            <form align = "left" id = "form-insert" method = "post" action = "{{url('/store')}}">
-                                <div class="form-group">
-                                    <label for="addtask">Task</label>
-                                    <input type="text" class="form-control" id = "task" name = "task" aria-describedby="addtask">
-                                </div>
-                                
-                                <input id="addtask-token" name="_token" type="hidden" value="{{csrf_token()}}">
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </form>
-                        </div>
-                        
-                        <!-- Modal footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>   
+            </table>
         </div>
     </div>
 
     <script>
         $(document).ready(function(){
+            $('#add_modal').click(function(){
+                $('#change_task').hide();
+                $('#delete').hide();
+                $('#submit_task').show();
+                $('#input_task').val(" ");
+            });
+
+            $(document).on('click','.item',function(event){
+                $('#modal_title').text('Modify Task');
+                $('#change_task').show();
+                $('#delete').show();
+                $('#submit_task').hide();
+                var task_txt = $(this).text();
+                var id = $(this).find('#task_id').val();
+                $('#input_task').val(task_txt);
+            });
+ 
             $.ajaxSetup({
                 headers:{
                     'X-CSRF-TOKEN': $('meta[name = "csrf-token"]').attr('content')
                 }
             });
 
-            $("#form-insert").on('submit',function(e){
-                e.preventDefault();
-                var data = $(this).serialize();
-                var task = $('#task').val();
-                var url = $(this).attr('action');
-                var method = $(this).attr('method');
-                function loadTable(){
+            function loadTable(){
                     $('#task_table').load(location.href + " #task_table");
-                }
+            }
+
+            function sweet_alert(message){
+                swal({
+                      title: "Task Added",
+                      text: message,
+                      icon: "success",
+                      timer:2000
+                    });
+            }
+
+            function post_data(message,data,url,method,id){
                 $.ajax({
                     type : method,
                     url : url,
@@ -138,16 +143,19 @@
                     success:function(response){
                         $(function () {
                             $('#myModal').modal('toggle');
-                            swal({
-                                  title: "Task Added",
-                                  text: "New Task Added Successfully",
-                                  icon: "success",
-                                  timer:2000
-                                });
+                            sweet_alert(message);
                             loadTable();
                         });  
                     }
-                });
+                });  
+            }
+            $("#form-insert").on('submit',function(e){
+                e.preventDefault();
+                var message = "New Task Added Successfully";
+                var data = $(this).serialize();
+                var url = $(this).attr('action');
+                var method = $(this).attr('method');
+                post_data(message,data,url,method);
             });
         });
     </script>
