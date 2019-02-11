@@ -116,7 +116,18 @@
                 var url = 'delete';
                 var data = $(this).serialize();
                 var method = $(this).attr('method');
-                send_data(message,data,url,method); 
+                $.ajax({
+                    type : 'get',
+                    url : 'delete/'+id,
+                    success:function(response){
+                        $(function () {
+                            $('#myModal').modal('toggle');
+                            sweet_alert(message);
+                            loadTable();
+                        }); 
+                        console.log(url);   
+                    }
+                }); 
             });
             
             $('#add_modal').click(function(){
@@ -150,7 +161,7 @@
                     });
             }
 
-            function send_data(message,data,url,method){
+            function send_data(message,data,url){
                 $.ajax({
                     type : 'post',
                     url : url,

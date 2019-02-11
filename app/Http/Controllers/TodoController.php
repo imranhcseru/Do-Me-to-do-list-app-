@@ -89,9 +89,9 @@ class TodoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function destroy($id)
     {
-        $id = $request->id;
+        // $id = $request->id;
         Task::where('id',$id)->delete();
     }
 }

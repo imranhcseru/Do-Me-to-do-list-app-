@@ -14,4 +14,4 @@
 Route::get('/','TodoController@index');
 Route::get('/home','TodoController@home');
 Route::post('/store','TodoController@store');
-Route::post('/delete','TodoController@destroy');
+Route::get('/delete/{id}','TodoController@destroy');
